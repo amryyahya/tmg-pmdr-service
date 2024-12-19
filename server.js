@@ -25,23 +25,25 @@ io.on('connection', (socket) => {
       rooms[room] = {
         remainingTime: 1000,  // Initial timer value in seconds
         isRunning: false,
-        lastUpdated: Date.now(),
+        lastUpdated: null,
       };
       if (!rooms[room].host){
         rooms[room].host = socket.id
       }
     } else {
-      const elapsedTime = Math.floor((Date.now() - rooms[room].lastUpdated) / 1000);
-      rooms[room].remainingTime -= elapsedTime; 
+      if (rooms[room].isRunning){
+        const elapsedTime = Math.floor((Date.now() - rooms[room].lastUpdated) / 1000);
+        rooms[room].remainingTime -= elapsedTime; 
+        rooms[room].lastUpdated = Date.now()
+        socket.emit("updateTimer", rooms[room]);
+      }
     }
-    socket.emit("updateTimer", rooms[room]);
   });
 
   socket.on("startTimer", (room) => {
     if (rooms[room] && !rooms[room].isRunning) {
       rooms[room].isRunning = true;
       rooms[room].lastUpdated = Date.now();
-
       io.to(room).emit("updateTimer", rooms[room]); // Notify all in the room
     }
   });
@@ -51,7 +53,6 @@ io.on('connection', (socket) => {
       const elapsedTime = Math.floor((Date.now() - rooms[room].lastUpdated) / 1000);
       rooms[room].remainingTime -= elapsedTime;
       rooms[room].isRunning = false;
-      rooms[room].lastUpdated = Date.now();
 
       io.to(room).emit("updateTimer", rooms[room]); // Notify all in the room
     }
