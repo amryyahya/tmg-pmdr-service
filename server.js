@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
   socket.on('JoinRoom', (room) => {
     socket.join(room);
     console.log(`${socket.displayName} joined room: ${room}`);
-    socket.to(room).emit('message', `User ${socket.displayName} has joined the room`);
+    socket.to(room).emit('message', {displayName:socket.displayName, message:"has joined the room"});
     if (!rooms[room]) {
       rooms[room] = {
         remainingTime: 1000,  // Initial timer value in seconds
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
 
   socket.on('SendMessage', ({ room, message }) => {
     console.log(`Message to ${room}: ${message}`);
-    io.to(room).emit('message', `${socket.displayName}: ${message}`);
+    io.to(room).emit('message', {displayName:socket.displayName, message:message});
   });
 
   socket.on('disconnect', () => {

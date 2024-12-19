@@ -8,7 +8,7 @@ let globalRoom = "";
 
 socket.on('message', (data) => {
     console.log(data);
-    document.getElementById("messages").innerHTML += "<br>" + data
+    document.getElementById("messages").innerHTML += "<br>" + `${data.displayName}: ${data.message}`
 });
 
 document.getElementById("joinForm").addEventListener("submit", (e) => {
