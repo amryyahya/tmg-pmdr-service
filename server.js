@@ -1,7 +1,6 @@
 const express = require('express');
 const socketio = require('socket.io');
 const path = require('path');
-const startCountdown = require('./timer')
 
 const app = express();
 app.use(express.static(path.resolve(__dirname, 'client')));
