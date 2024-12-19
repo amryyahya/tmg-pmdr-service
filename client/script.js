@@ -38,11 +38,11 @@ socket.on("updateTimer", (data) => {
 });
 
 document.getElementById("startBtn").addEventListener("click", () => {
-    socket.emit("startTimer", room);
+    socket.emit("startTimer", globalRoom);
 });
 
 document.getElementById("pauseBtn").addEventListener("click", () => {
-    socket.emit("pauseTimer", room);
+    socket.emit("pauseTimer", globalRoom);
 });
 
 function startLocalTimer(remainingTime) {
