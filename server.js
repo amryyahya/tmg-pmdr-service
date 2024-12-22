@@ -1,6 +1,7 @@
 const express = require('express');
 const socketio = require('socket.io');
 const path = require('path');
+const { connectToDB, closeConnection } = require('./db');
 
 const app = express();
 app.use(express.static(path.resolve(__dirname, 'client')));
@@ -15,27 +16,34 @@ const server = app.listen(1337, () => {
 
 const io = socketio(server)
 const rooms = {};
+const db = await connectToDB();
+const roomsCollection = db.collection('rooms');
 
 io.on('connection', (socket) => {
-  socket.on('JoinRoom', (room) => {
+  socket.on('JoinRoom', async (room) => {
     socket.join(room);
     console.log(`${socket.displayName} joined room: ${room}`);
     socket.to(room).emit('message', {displayName:socket.displayName, message:"has joined the room"});
-    if (!rooms[room]) {
-      rooms[room] = {
-        remainingTime: 1000,  // Initial timer value in seconds
+    let roomData = await roomsCollection.findOne({ name: room });
+    if (!roomData) {
+      roomData = {
+        name: room,
+        remainingTime: 1000, // Initial timer value in seconds
         isRunning: false,
         lastUpdated: null,
+        host: socket.id
       };
-      if (!rooms[room].host){
-        rooms[room].host = socket.id
-      }
+      await roomsCollection.insertOne(roomData);
     } else {
-      if (rooms[room].isRunning){
-        const elapsedTime = Math.floor((Date.now() - rooms[room].lastUpdated) / 1000);
-        rooms[room].remainingTime -= elapsedTime; 
-        rooms[room].lastUpdated = Date.now()
-        socket.emit("updateTimer", rooms[room]);
+      if (roomData.isRunning) {
+        const elapsedTime = Math.floor((Date.now() - roomData.lastUpdated) / 1000);
+        roomData.remainingTime -= elapsedTime;
+        roomData.lastUpdated = Date.now();
+        await roomsCollection.updateOne(
+          { name: room },
+          { $set: { remainingTime: roomData.remainingTime, lastUpdated: roomData.lastUpdated } }
+        );
+        socket.emit("updateTimer", roomData);
       }
     }
   });
