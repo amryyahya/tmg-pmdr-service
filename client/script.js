@@ -38,7 +38,7 @@ socket.on("updateTimer", (data) => {
 });
 
 document.getElementById("startBtn").addEventListener("click", () => {
-    socket.emit("startTimer", globalRoom);
+    socket.emit("StartTimer", globalRoom);
 });
 
 document.getElementById("pauseBtn").addEventListener("click", () => {
