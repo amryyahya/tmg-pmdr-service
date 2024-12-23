@@ -54,11 +54,16 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on("startTimer", (room) => {
-    if (rooms[room] && !rooms[room].isRunning) {
-      rooms[room].isRunning = true;
-      rooms[room].lastUpdated = Date.now();
-      io.to(room).emit("updateTimer", rooms[room]); // Notify all in the room
+  socket.on("StartTimer", async (room) => {
+    const roomData = await roomsCollection.findOne({ name: room });
+    if (roomData && !roomData.isRunning) {
+      roomData.isRunning = true;
+      roomData.lastUpdated = Date.now();
+      await roomsCollection.updateOne(
+        { name: room },
+        { $set: { isRunning: true, lastUpdated: roomData.lastUpdated } }
+      );
+      io.to(room).emit("updateTimer", roomData);
     }
   });
 
