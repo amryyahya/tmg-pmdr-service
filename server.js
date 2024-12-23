@@ -16,8 +16,14 @@ const server = app.listen(1337, () => {
 
 const io = socketio(server)
 const rooms = {};
-const db = await connectToDB();
-const roomsCollection = db.collection('rooms');
+
+let roomsCollection;
+async function initializeDB() {
+  const db = await connectToDB(); // Replace with your actual connection function
+  roomsCollection = db.collection('rooms');
+}
+
+initializeDB().catch(console.error);
 
 io.on('connection', (socket) => {
   socket.on('JoinRoom', async (room) => {
