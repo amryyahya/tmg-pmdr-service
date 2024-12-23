@@ -14,6 +14,7 @@ async function connectToDB() {
   }
 
   const db = client.db(dbName);
+  await db.createCollection("rooms");
   return db;
 }
 
