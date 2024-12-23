@@ -15,7 +15,6 @@ const server = app.listen(1337, () => {
 });
 
 const io = socketio(server)
-const rooms = {};
 
 let roomsCollection;
 async function initializeDB() {
