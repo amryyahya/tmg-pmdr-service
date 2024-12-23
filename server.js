@@ -67,13 +67,19 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on("pauseTimer", (room) => {
-    if (rooms[room] && rooms[room].isRunning) {
-      const elapsedTime = Math.floor((Date.now() - rooms[room].lastUpdated) / 1000);
-      rooms[room].remainingTime -= elapsedTime;
-      rooms[room].isRunning = false;
+  socket.on("PauseTimer", async (room) => {
+    const roomData = await roomsCollection.findOne({ name: room });
 
-      io.to(room).emit("updateTimer", rooms[room]); // Notify all in the room
+    if (roomData && roomData.isRunning) {
+      const elapsedTime = Math.floor((Date.now() - roomData.lastUpdated) / 1000);
+      roomData.remainingTime -= elapsedTime;
+      roomData.isRunning = false;
+
+      await roomsCollection.updateOne(
+        { name: room },
+        { $set: { remainingTime: roomData.remainingTime, isRunning: false } }
+      );
+      io.to(room).emit("updateTimer", roomData);
     }
   });
 

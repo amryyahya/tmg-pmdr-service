@@ -42,7 +42,7 @@ document.getElementById("startBtn").addEventListener("click", () => {
 });
 
 document.getElementById("pauseBtn").addEventListener("click", () => {
-    socket.emit("pauseTimer", globalRoom);
+    socket.emit("PauseTimer", globalRoom);
 });
 
 function startLocalTimer(remainingTime) {
